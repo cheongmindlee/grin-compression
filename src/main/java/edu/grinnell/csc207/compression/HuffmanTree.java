@@ -15,7 +15,30 @@ import java.util.Map;
  * our byte values.
  */
 public class HuffmanTree {
+    Node root;
 
+    private class Node{
+        short value;
+        int frequency;
+        Node left;
+        Node right;
+        boolean isLeaf;
+
+        //Constructor for when we create a leaf
+        Node(short value, int freq){
+            this.value = value;
+            this.frequency = freq;
+            this.isLeaf = true;
+        }
+
+        //Cunstructor for when we create a inside node
+        Node(Node left, Node right){
+            this.left = left;
+            this.right = right;
+            this.frequency = left.frequency +right.frequency;
+            this.isLeaf = false;
+        }
+    }
     /**
      * Constructs a new HuffmanTree from a frequency map.
      * @param freqs a map from 9-bit values to frequencies.
@@ -29,7 +52,28 @@ public class HuffmanTree {
      * @param in the input file (as a BitInputStream)
      */
     public HuffmanTree (BitInputStream in) {
-        // TODO: fill me in!
+        this.root = readTree(in);
+    }
+
+    /**
+     * Go through the entire binary coded Huffman tree and recursivly recover the original shape of the tree
+     * @param in the input file (as a BitInputStream)
+     * @return The root node of the entire tree
+     */
+    public Node readTree(BitInputStream in){
+        //Take in a single bit from the file 
+        int bit = in.readBit();
+
+        //If bit == 1 return the node and the value associated with it else keep traversing down the tree
+        if(bit == 0){
+            short val = (short)in.readBits(9);
+            return new Node(val, 0);
+        } else {
+            Node l = readTree(in);
+            Node r = readTree(in);
+            return new Node(l, r);
+        }
+
     }
 
     /**
@@ -61,6 +105,30 @@ public class HuffmanTree {
      * @param out the file to write the decompressed output to.
      */
     public void decode (BitInputStream in, BitOutputStream out) {
-        // TODO: fill me in!
+        Node temp = root;
+        int bit = in.readBit();
+        while(bit != -1){
+            if(bit == 0){
+                temp = temp.left;
+            } else {
+                temp = temp.right;
+            }
+
+            //Check if we are at a leaf
+            if(temp.isLeaf){
+                //Check if we are at the EOF
+                if(temp.value == 256){
+                    //If it is the end end the function
+                    return;
+                }
+                //Write the character out into the outstream
+                out.writeBits(temp.value, 8);
+                temp = root;
+            }
+
+            bit = in.readBit();
+        }
+
+
     }
 }

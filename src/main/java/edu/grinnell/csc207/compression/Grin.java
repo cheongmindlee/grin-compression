@@ -1,5 +1,7 @@
 package edu.grinnell.csc207.compression;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Map;
 
 /**
@@ -13,7 +15,25 @@ public class Grin {
      * @param outfile the file to ouptut to
      */
     public static void decode (String infile, String outfile) {
-        // TODO: fill me in!
+        try{
+            BitInputStream in = new BitInputStream(infile);
+            BitOutputStream out = new BitOutputStream(outfile);
+
+            //Check the magic number is a grinfile
+            int magic = in.readBits(32);
+            if(magic != 1846){
+                throw new IllegalArgumentException("invalid file type");
+            }
+
+            //Construct a Huffmantree from the infile
+            HuffmanTree tree = new HuffmanTree(in);
+
+            //Decode the text
+            tree.decode(in, out);
+        } catch(IOException e){
+            throw new IllegalArgumentException("There was an error reading the bitstream", e);
+        }
+
     }
 
     /**
@@ -43,7 +63,22 @@ public class Grin {
      * @param args the command-line arguments.
      */
     public static void main(String[] args) {
-        // TODO: fill me in!
         System.out.println("Usage: java Grin <encode|decode> <infile> <outfile>");
+        //Make sure there are correct user inputs
+        if(args.length != 3){
+            System.out.println("Please make sure your input is of form <encode|decode> <infile> <outfile>");
+            return;
+        } 
+        //Make sure there were 
+        String input = args[0];
+        String inFile = args[1];
+        String outFile = args[2];
+
+        if(input.equals("decode")){
+            decode(inFile, outFile);
+            System.out.println("This ran");
+        } else{
+            System.out.println("This is not working");
+        }
     }
 }
