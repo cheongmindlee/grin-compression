@@ -1,7 +1,10 @@
 package edu.grinnell.csc207.compression;
 
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,8 +57,18 @@ public class Grin {
      * @param infile the file to encode.
      * @param outfile the file to write the output to.
      */
-    public static void encode(String infile, String outfile) {
-        // TODO: fill me in!
+    public static void encode(String infile, String outfile) throws IOException{
+        Map<Short, Integer> freq;
+        Path path = Path.of(infile);
+        String text = Files.readString(path);
+
+        List<String> words = Arrays.asList(text.split("\\R"));
+        for(String word: words){
+            freq.get()
+            freq.put(Integer.parseInt(word), );
+            
+        }
+
     }
 
     /**
