@@ -1,5 +1,6 @@
 package edu.grinnell.csc207.compression;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 
@@ -17,6 +18,7 @@ import java.util.PriorityQueue;
  */
 public class HuffmanTree {
     Node root;
+    private Map<Short, String> charMap = new HashMap<>();
 
     private class Node{
         short value;
@@ -48,7 +50,6 @@ public class HuffmanTree {
         //Create a priority Queue to hold the nodes
         PriorityQueue<Node> queue = new PriorityQueue<>();
 
-        
         //Add all of the nodes to the queue
         for(Map.Entry<Short, Integer> character : freqs.entrySet()){
             short key = character.getKey();
@@ -66,9 +67,11 @@ public class HuffmanTree {
             queue.add(newNode);
         }
 
-
         //Get the final completed tree
         this.root = queue.poll();
+
+        //Create the charMap
+        charMap(root, "");
     }
 
     /**
@@ -97,7 +100,6 @@ public class HuffmanTree {
             Node r = readTree(in);
             return new Node(l, r);
         }
-
     }
 
     /**
@@ -106,9 +108,34 @@ public class HuffmanTree {
      * @param out the output file as a BitOutputStream
      */
     public void serialize (BitOutputStream out) {
-        // TODO: fill me in!
+        serializeHelper(root, out); 
+    }
+
+    /**
+     * Helper method for serialize
+     * @param node A node object
+     * @param out the bitoutput stream 
+     */
+    public void serializeHelper(Node node, BitOutputStream out){
+        if(node.isLeaf){
+            out.writeBit(0);
+            out.writeBits(node.value, 9);
+        } else{
+            out.writeBit(1);
+            serializeHelper(node.left, out);
+            serializeHelper(node.right, out);
+        }
     }
    
+
+    public void charMap(Node root, String path){
+        if(root.isLeaf){
+            charMap.put(root.value, path);
+        } else {
+            charMap(root.left, path + "0");
+            charMap(root.right, path + "1");
+        }
+    }
     /**
      * Encodes the file given as a stream of bits into a compressed format
      * using this Huffman tree. The encoded values are written, bit-by-bit
@@ -117,7 +144,17 @@ public class HuffmanTree {
      * @param out the file to write the compressed output to.
      */
     public void encode (BitInputStream in, BitOutputStream out) {
-        //
+        int input;
+
+        //Keep reading the input from the BitInputStream until we hit EOF
+        while((input = in.readBits(8)) != -1){
+            String path = charMap.get((short)input);
+            int length = path.length();
+            out.writeBits(length, Integer.parseInt(path));
+        }
+
+        //Write the EOF character
+        out.writeBits(9, 256);
     }
 
     /**
