@@ -27,7 +27,7 @@ public class Grin {
             // Check the magic number is a grinfile
             int magic = in.readBits(32);
             if (magic != 1846) {
-                throw new IllegalArgumentException("Incorrect magic number");
+                throw new IllegalArgumentException("Incorrect magic number" + magic);
             }
 
             // Construct a Huffmantree from the infile
@@ -92,7 +92,7 @@ public class Grin {
         // Write the magic number to the outfile
         BitOutputStream out = new BitOutputStream(outfile);
         BitInputStream in = new BitInputStream(infile);
-        out.writeBits(32, 1846);
+        out.writeBits(1846, 32);
 
         // Serialize the HuffmanTree to the outfile
         tree.serialize(out);
@@ -112,7 +112,7 @@ public class Grin {
         System.out.println("Usage: java Grin <encode|decode> <infile> <outfile>");
         // Make sure there are correct user inputs
         if (args.length != 3) {
-            System.out.println("Please make sure your input is of form <encode|decode> <infile> <outfile>");
+            System.out.println("Please make sure your input is of the form <encode|decode> <infile> <outfile>");
             return;
         }
         // Make sure there were
