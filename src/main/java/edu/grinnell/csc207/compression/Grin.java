@@ -86,6 +86,21 @@ public class Grin {
         // Create a frequency map from the input file
         Map<Short, Integer> frequencyMap = createFrequencyMap(infile);
 
+        // Create a HuffmanTree from the frequency map
+        HuffmanTree tree = new HuffmanTree(frequencyMap);
+
+        // Write the magic number to the outfile
+        BitOutputStream out = new BitOutputStream(outfile);
+        BitInputStream in = new BitInputStream(infile);
+        out.writeBits(32, 1846);
+
+        // Serialize the HuffmanTree to the outfile
+        tree.serialize(out);
+        tree.encode(in, out);
+
+        // Close the streams
+        out.close();
+        in.close();
     }
 
     /**
@@ -107,7 +122,14 @@ public class Grin {
 
         if (input.equals("decode")) {
             decode(inFile, outFile);
+        } else if (input.equals("encode")) {
+            try {
+                encode(inFile, outFile);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Error in encoding", e);
+            }
         } else {
+            System.out.println("First argument must be either 'encode' or 'decode'");
         }
     }
 }
